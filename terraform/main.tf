@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 0.15"
   required_providers {
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = ">= 1.7.0"
+      version = ">= 1.14.0"
     }
   }
   backend "gcs" {
@@ -24,6 +24,8 @@ resource "google_service_account" "main" {
 }
 
 resource "google_container_cluster" "main" {
+  provider = google-beta
+
   name     = var.cluster_name
   location = var.location
 
@@ -33,8 +35,17 @@ resource "google_container_cluster" "main" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
+  cluster_autoscaling {
+    enabled             = true
+    autoscaling_profile = "OPTIMIZE_UTILIZATION"
+    resource_limits {
+      resource_type = "cpu"
+      maximum       = 6
+    }
+    resource_limits {
+      resource_type = "memory"
+      maximum       = 24
+    }
   }
 }
 
@@ -43,10 +54,10 @@ resource "google_container_node_pool" "main_spot_nodes" {
   location = var.location
   cluster  = google_container_cluster.main.name
 
-  initial_node_count = 2
+  initial_node_count = 1
 
   autoscaling {
-    min_node_count = 2
+    min_node_count = 1
     max_node_count = 3
   }
 
@@ -71,25 +82,73 @@ resource "google_container_node_pool" "main_spot_nodes" {
   }
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  depends_on      = [google_container_cluster.main]
-  create_duration = "30s"
+resource "google_container_node_pool" "gpu_spot_nodes" {
+  name     = "${var.cluster_name}-nodepool-gpu"
+  location = var.location
+  cluster  = google_container_cluster.main.name
+
+  initial_node_count = 0
+
+  autoscaling {
+    min_node_count = 0
+    max_node_count = 1
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  node_config {
+    preemptible  = true
+    machine_type = "n1-standard-1"
+
+    guest_accelerator {
+      type  = "nvidia-tesla-t4"
+      count = 1
+    }
+
+    service_account = google_service_account.main.email
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+  }
 }
 
-module "gke_auth" {
-  depends_on           = [time_sleep.wait_30_seconds]
-  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
-  project_id           = var.project_id
-  cluster_name         = google_container_cluster.main.name
-  location             = var.location
-  use_private_endpoint = false
+# resource "time_sleep" "wait_30_seconds" {
+#   depends_on      = [google_container_cluster.main]
+#   create_duration = "30s"
+# }
+
+# module "gke_auth" {
+#   depends_on           = [time_sleep.wait_30_seconds]
+#   source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+#   project_id           = var.project_id
+#   cluster_name         = google_container_cluster.main.name
+#   location             = var.location
+#   use_private_endpoint = false
+# }
+
+data "google_client_config" "default" {
+}
+
+data "google_container_cluster" "main" {
+  name     = var.cluster_name
+  location = var.location
 }
 
 provider "kubectl" {
-  host                   = module.gke_auth.host
-  cluster_ca_certificate = module.gke_auth.cluster_ca_certificate
-  token                  = module.gke_auth.token
-  load_config_file       = false
+  host  = "https://${data.google_container_cluster.main.endpoint}"
+  token = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(
+    data.google_container_cluster.main.master_auth[0].cluster_ca_certificate,
+  )
+  load_config_file = false
 }
 
 data "kubectl_file_documents" "namespaces" {
@@ -119,8 +178,8 @@ data "kubectl_file_documents" "cert_issuer" {
 }
 
 resource "kubectl_manifest" "cert_issuer" {
-  count              = length(data.kubectl_file_documents.cert_issuer.documents)
-  yaml_body          = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
+  count     = length(data.kubectl_file_documents.cert_issuer.documents)
+  yaml_body = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
 }
 
 data "kubectl_file_documents" "nginx" {
