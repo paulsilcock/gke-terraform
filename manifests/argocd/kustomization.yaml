@@ -12,11 +12,3 @@ patchesJson6902:
       - op: replace
         path: /spec/template/spec/containers/0/command
         value: ["argocd-server", "--insecure"]
-  - target:
-      kind: Service
-      version: v1
-      name: argocd-server
-    patch: |-
-      - op: replace
-        path: /spec/type
-        value: NodePort

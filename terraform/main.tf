@@ -24,35 +24,39 @@ resource "google_service_account" "main" {
 }
 
 resource "google_container_cluster" "main" {
-  name     = "${var.cluster_name}"
+  name     = var.cluster_name
   location = var.location
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = 1  
+  initial_node_count       = 1
+
+  workload_identity_config {
+    workload_pool = "${var.project_id}.svc.id.goog"
+  }
 }
 
 resource "google_container_node_pool" "main_spot_nodes" {
-  name               = "${var.cluster_name}-nodepool"
-  location           = var.location
-  cluster            = google_container_cluster.main.name
+  name     = "${var.cluster_name}-nodepool"
+  location = var.location
+  cluster  = google_container_cluster.main.name
 
   initial_node_count = 2
-  
+
   autoscaling {
     min_node_count = 2
     max_node_count = 3
   }
 
   management {
-    auto_repair = true
+    auto_repair  = true
     auto_upgrade = true
   }
 
   node_config {
-    preemptible = true
+    preemptible  = true
     machine_type = "e2-highmem-2"
 
     service_account = google_service_account.main.email
@@ -60,7 +64,7 @@ resource "google_container_node_pool" "main_spot_nodes" {
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
-  
+
   timeouts {
     create = "20m"
     update = "20m"
@@ -68,7 +72,7 @@ resource "google_container_node_pool" "main_spot_nodes" {
 }
 
 resource "time_sleep" "wait_30_seconds" {
-  depends_on = [google_container_cluster.main]
+  depends_on      = [google_container_cluster.main]
   create_duration = "30s"
 }
 
@@ -89,33 +93,51 @@ provider "kubectl" {
 }
 
 data "kubectl_file_documents" "namespaces" {
-    content = file("../manifests/namespaces.yaml")
-} 
-
-data "kubectl_file_documents" "certs" {
-    content = file("../manifests/certs.yaml")
-} 
-
-data "kubectl_file_documents" "argocd" {
-    content = file("../manifests/install-argocd.yaml")
-} 
-
-resource "kubectl_manifest" "namespaces" {
-    count     = length(data.kubectl_file_documents.namespaces.documents)
-    yaml_body = element(data.kubectl_file_documents.namespaces.documents, count.index)
+  content = file("../manifests/namespaces.yaml")
 }
 
-resource "kubectl_manifest" "certs" {
-    count     = length(data.kubectl_file_documents.certs.documents)
-    yaml_body = element(data.kubectl_file_documents.certs.documents, count.index)
+data "kubectl_file_documents" "argocd" {
+  content = file("../manifests/install-argocd.yaml")
+}
+
+resource "kubectl_manifest" "namespaces" {
+  count     = length(data.kubectl_file_documents.namespaces.documents)
+  yaml_body = element(data.kubectl_file_documents.namespaces.documents, count.index)
+}
+
+data "kubectl_file_documents" "certmanager" {
+  content = file("../manifests/cert-manager-v1.9.1.yaml")
+}
+
+resource "kubectl_manifest" "certmanager" {
+  count     = length(data.kubectl_file_documents.certmanager.documents)
+  yaml_body = element(data.kubectl_file_documents.certmanager.documents, count.index)
+}
+
+data "kubectl_file_documents" "cert_issuer" {
+  content = file("../manifests/issuer.yaml")
+}
+
+resource "kubectl_manifest" "cert_issuer" {
+  count              = length(data.kubectl_file_documents.cert_issuer.documents)
+  yaml_body          = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
+}
+
+data "kubectl_file_documents" "nginx" {
+  content = file("../manifests/ingress-nginx-v1.4.0.yaml")
+}
+
+resource "kubectl_manifest" "nginx" {
+  count     = length(data.kubectl_file_documents.nginx.documents)
+  yaml_body = element(data.kubectl_file_documents.nginx.documents, count.index)
 }
 
 resource "kubectl_manifest" "argocd" {
-    depends_on = [
-      kubectl_manifest.namespaces,
-      kubectl_manifest.certs
-    ]
-    count     = length(data.kubectl_file_documents.argocd.documents)
-    yaml_body = element(data.kubectl_file_documents.argocd.documents, count.index)
-    override_namespace = "argocd"
+  depends_on = [
+    kubectl_manifest.namespaces,
+    kubectl_manifest.nginx
+  ]
+  count              = length(data.kubectl_file_documents.argocd.documents)
+  yaml_body          = element(data.kubectl_file_documents.argocd.documents, count.index)
+  override_namespace = "argocd"
 }
