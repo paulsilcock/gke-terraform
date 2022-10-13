@@ -120,20 +120,6 @@ resource "google_container_node_pool" "gpu_spot_nodes" {
   }
 }
 
-# resource "time_sleep" "wait_30_seconds" {
-#   depends_on      = [google_container_cluster.main]
-#   create_duration = "30s"
-# }
-
-# module "gke_auth" {
-#   depends_on           = [time_sleep.wait_30_seconds]
-#   source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
-#   project_id           = var.project_id
-#   cluster_name         = google_container_cluster.main.name
-#   location             = var.location
-#   use_private_endpoint = false
-# }
-
 data "google_client_config" "default" {
 }
 
@@ -199,4 +185,16 @@ resource "kubectl_manifest" "argocd" {
   count              = length(data.kubectl_file_documents.argocd.documents)
   yaml_body          = element(data.kubectl_file_documents.argocd.documents, count.index)
   override_namespace = "argocd"
+}
+
+data "kubectl_file_documents" "rootapp" {
+  content = file("../manifests/root-app.yaml")
+}
+
+resource "kubectl_manifest" "rootapp" {
+  depends_on = [
+    kubectl_manifest.argocd
+  ]
+  count     = length(data.kubectl_file_documents.rootapp.documents)
+  yaml_body = element(data.kubectl_file_documents.rootapp.documents, count.index)
 }
