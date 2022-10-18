@@ -46,7 +46,7 @@ resource "google_container_cluster" "main" {
 }
 
 resource "google_container_node_pool" "single_node" {
-  name     = "${var.cluster_name}-nodepool"
+  name     = "${var.cluster_name}-single-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
@@ -80,7 +80,7 @@ resource "google_container_node_pool" "single_node" {
 }
 
 resource "google_container_node_pool" "main_spot_nodes" {
-  name     = "${var.cluster_name}-nodepool"
+  name     = "${var.cluster_name}-main-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
