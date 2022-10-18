@@ -88,7 +88,7 @@ resource "google_container_node_pool" "main_spot_nodes" {
 
   autoscaling {
     min_node_count = 0
-    max_node_count = 3
+    max_node_count = 2
   }
 
   management {
@@ -98,7 +98,7 @@ resource "google_container_node_pool" "main_spot_nodes" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-highmem-2"
+    machine_type = "e2-standard-2"
 
     disk_size_gb = 20
 
