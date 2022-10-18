@@ -61,7 +61,7 @@ resource "google_container_node_pool" "single_node" {
     preemptible  = true
     machine_type = "e2-medium"
 
-    disk_size_gb = 10
+    disk_size_gb = 15
 
     service_account = google_service_account.main.email
     oauth_scopes = [
