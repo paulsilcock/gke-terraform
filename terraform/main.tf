@@ -40,15 +40,49 @@ resource "google_container_cluster" "main" {
   }
 }
 
-resource "google_container_node_pool" "main_spot_nodes" {
+resource "google_container_node_pool" "single_node" {
   name     = "${var.cluster_name}-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
   initial_node_count = 1
 
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  node_config {
+    preemptible  = true
+    machine_type = "e2-small"
+
+    disk_size_gb = 10
+
+    service_account = google_service_account.main.email
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+  }
+}
+
+resource "google_container_node_pool" "main_spot_nodes" {
+  name     = "${var.cluster_name}-nodepool"
+  location = var.location
+  cluster  = google_container_cluster.main.name
+
+  initial_node_count = 0
+
   autoscaling {
-    min_node_count = 1
+    min_node_count = 0
     max_node_count = 3
   }
 
