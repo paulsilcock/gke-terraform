@@ -29,6 +29,11 @@ resource "google_container_cluster" "main" {
   name     = var.cluster_name
   location = var.location
 
+  cluster_autoscaling {
+    enabled = false
+  }
+
+
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -212,7 +217,7 @@ resource "google_service_account" "dvc-gsa" {
 }
 resource "google_service_account_iam_binding" "workload_identity_binding" {
   service_account_id = google_service_account.dvc-gsa.id
-  role    = "roles/iam.workloadIdentityUser"
+  role               = "roles/iam.workloadIdentityUser"
   members = [
     "serviceAccount:${var.project_id}.svc.id.goog[dev/dvc-remote]"
   ]
