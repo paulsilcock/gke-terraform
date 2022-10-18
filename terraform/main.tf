@@ -59,7 +59,7 @@ resource "google_container_node_pool" "single_node" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-small"
+    machine_type = "e2-medium"
 
     disk_size_gb = 10
 
