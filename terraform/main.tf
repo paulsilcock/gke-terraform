@@ -110,6 +110,12 @@ resource "google_container_node_pool" "main_spot_nodes" {
     workload_metadata_config {
       mode = "GKE_METADATA"
     }
+
+    taint {
+      key = "type"
+      value = "workload"
+      effect = "PREFER_NO_SCHEDULE"
+    }
   }
 
   timeouts {
@@ -153,6 +159,12 @@ resource "google_container_node_pool" "gpu_spot_nodes" {
 
     workload_metadata_config {
       mode = "GKE_METADATA"
+    }
+
+    taint {
+      key = "type"
+      value = "workload"
+      effect = "PREFER_NO_SCHEDULE"
     }
   }
 
