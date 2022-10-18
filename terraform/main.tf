@@ -35,19 +35,6 @@ resource "google_container_cluster" "main" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  cluster_autoscaling {
-    enabled             = true
-    autoscaling_profile = "OPTIMIZE_UTILIZATION"
-    resource_limits {
-      resource_type = "cpu"
-      maximum       = 6
-    }
-    resource_limits {
-      resource_type = "memory"
-      maximum       = 24
-    }
-  }
-
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
