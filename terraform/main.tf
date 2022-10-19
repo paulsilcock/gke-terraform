@@ -33,7 +33,6 @@ resource "google_container_cluster" "main" {
     enabled = false
   }
 
-
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -112,8 +111,8 @@ resource "google_container_node_pool" "main_spot_nodes" {
     }
 
     taint {
-      key = "type"
-      value = "workload"
+      key    = "type"
+      value  = "workload"
       effect = "PREFER_NO_SCHEDULE"
     }
   }
@@ -162,8 +161,8 @@ resource "google_container_node_pool" "gpu_spot_nodes" {
     }
 
     taint {
-      key = "type"
-      value = "workload"
+      key    = "type"
+      value  = "workload"
       effect = "PREFER_NO_SCHEDULE"
     }
   }
@@ -234,7 +233,13 @@ resource "google_service_account_iam_binding" "workload_identity_binding" {
     "serviceAccount:${var.project_id}.svc.id.goog[dev/dvc-remote]"
   ]
 }
-
+resource "google_project_iam_binding" "artifact-registry-read" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  members = [
+    "serviceAccount:${google_service_account.dvc-gsa.email}"
+  ]
+}
 resource "kubectl_manifest" "ksa-binding" {
   depends_on = [
     kubectl_manifest.namespaces
@@ -334,4 +339,27 @@ resource "kubectl_manifest" "rootapp" {
   ]
   count     = length(data.kubectl_file_documents.rootapp.documents)
   yaml_body = element(data.kubectl_file_documents.rootapp.documents, count.index)
+}
+
+# Create GSA to allow submission of workloads from outside of cluster
+# We only provide the roles/container.clusterViewer role which allows 
+# authentication with the cluster, but nothing else. We must bind 
+# the GSA to an appropriate Role/ClusterRole for further KA permisisons.
+resource "google_service_account" "argo-workflow" {
+  account_id   = "argo-workflow"
+  display_name = "Argo workflow management"
+}
+resource "google_project_iam_binding" "artifact-registry-write" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  members = [
+    "serviceAccount:${google_service_account.argo-workflow.email}"
+  ]
+}
+resource "google_project_iam_binding" "cluster-viewer" {
+  project = var.project_id
+  role    = "roles/container.clusterViewer"
+  members = [
+    "serviceAccount:${google_service_account.argo-workflow.email}"
+  ]
 }
