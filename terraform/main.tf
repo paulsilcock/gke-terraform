@@ -29,6 +29,9 @@ resource "google_container_cluster" "main" {
   name     = var.cluster_name
   location = var.location
 
+  # This disabled "Node Auto Provisioning", which 
+  # creates additional node pools to meet demand. 
+  # Instead allow provisioned node pools to scale.
   cluster_autoscaling {
     enabled = false
   }
@@ -44,12 +47,17 @@ resource "google_container_cluster" "main" {
   }
 }
 
-resource "google_container_node_pool" "single_node" {
-  name     = "${var.cluster_name}-single-nodepool"
+resource "google_container_node_pool" "generic" {
+  name     = "${var.cluster_name}-generic-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
   initial_node_count = 1
+
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
 
   management {
     auto_repair  = true
@@ -58,7 +66,7 @@ resource "google_container_node_pool" "single_node" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-medium"
+    machine_type = "e2-small"
 
     disk_size_gb = 15
 
@@ -78,8 +86,8 @@ resource "google_container_node_pool" "single_node" {
   }
 }
 
-resource "google_container_node_pool" "main_spot_nodes" {
-  name     = "${var.cluster_name}-main-nodepool"
+resource "google_container_node_pool" "workloads" {
+  name     = "${var.cluster_name}-workload-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
@@ -113,7 +121,7 @@ resource "google_container_node_pool" "main_spot_nodes" {
     taint {
       key    = "type"
       value  = "workload"
-      effect = "PREFER_NO_SCHEDULE"
+      effect = "NO_SCHEDULE"
     }
   }
 
@@ -123,8 +131,8 @@ resource "google_container_node_pool" "main_spot_nodes" {
   }
 }
 
-resource "google_container_node_pool" "gpu_spot_nodes" {
-  name     = "${var.cluster_name}-nodepool-gpu"
+resource "google_container_node_pool" "gpu" {
+  name     = "${var.cluster_name}-gpu-nodepool"
   location = var.location
   cluster  = google_container_cluster.main.name
 
@@ -158,12 +166,6 @@ resource "google_container_node_pool" "gpu_spot_nodes" {
 
     workload_metadata_config {
       mode = "GKE_METADATA"
-    }
-
-    taint {
-      key    = "type"
-      value  = "workload"
-      effect = "PREFER_NO_SCHEDULE"
     }
   }
 
@@ -237,7 +239,8 @@ resource "google_project_iam_binding" "artifact-registry-read" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
   members = [
-    "serviceAccount:${google_service_account.dvc-gsa.email}"
+    "serviceAccount:${google_service_account.dvc-gsa.email}",
+    "serviceAccount:${google_service_account.main.email}"
   ]
 }
 resource "kubectl_manifest" "ksa-binding" {
@@ -361,5 +364,30 @@ resource "google_project_iam_binding" "cluster-viewer" {
   role    = "roles/container.clusterViewer"
   members = [
     "serviceAccount:${google_service_account.argo-workflow.email}"
+  ]
+}
+
+# Allow Github access to GKE without using tokens
+resource "google_iam_workload_identity_pool" "workload-pool" {
+  workload_identity_pool_id = "workload-pool"
+  display_name              = "Workload pool"
+  description               = "Identity pool for external access (e.g. Github)"
+}
+resource "google_iam_workload_identity_pool_provider" "github-provider" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.workload-pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github-provider"
+  attribute_mapping = {
+    "google.subject" : "assertion.sub"
+    "attribute.repository" : "assertion.repository"
+  }
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+resource "google_service_account_iam_binding" "argo-workflow-github-access" {
+  service_account_id = google_service_account.argo-workflow.id
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
   ]
 }
