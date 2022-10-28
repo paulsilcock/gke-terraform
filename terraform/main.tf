@@ -391,3 +391,11 @@ resource "google_service_account_iam_binding" "argo-workflow-github-access" {
     "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
   ]
 }
+
+resource "google_service_account_iam_binding" "dvc-remote-github-access" {
+  service_account_id = google_service_account.dvc-gsa.id
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
+  ]
+}
