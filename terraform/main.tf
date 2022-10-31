@@ -228,12 +228,10 @@ resource "google_service_account" "dvc-gsa" {
   account_id   = "dvc-remote"
   display_name = "DVC remote access"
 }
-resource "google_service_account_iam_binding" "workload_identity_binding" {
+resource "google_service_account_iam_member" "dvc-gsa" {
   service_account_id = google_service_account.dvc-gsa.id
   role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[dev/dvc-remote]"
-  ]
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[dev/dvc-remote]"
 }
 resource "google_project_iam_binding" "artifact-registry-read" {
   project = var.project_id
@@ -384,18 +382,14 @@ resource "google_iam_workload_identity_pool_provider" "github-provider" {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }
-resource "google_service_account_iam_binding" "argo-workflow-github-access" {
+resource "google_service_account_iam_member" "argo-workflow-github-access" {
   service_account_id = google_service_account.argo-workflow.id
   role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
-  ]
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
 }
 
-resource "google_service_account_iam_binding" "dvc-remote-github-access" {
+resource "google_service_account_iam_member" "dvc-remote-github-access" {
   service_account_id = google_service_account.dvc-gsa.id
   role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
-  ]
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
 }
