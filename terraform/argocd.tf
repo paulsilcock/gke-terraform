@@ -1,5 +1,9 @@
+data "external" "argocd" {
+  program = ["kustomize", "${path.root}/../manifests/argocd"]
+}
+
 data "kubectl_file_documents" "argocd" {
-  content = file("../manifests/install-argocd.yaml")
+  content = data.external.argocd
 }
 
 resource "kubectl_manifest" "argocd" {
