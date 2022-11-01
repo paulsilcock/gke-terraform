@@ -1,4 +1,4 @@
-name: Create Kubernetes Cluster and Install Argo
+name: Create Kubernetes Cluster and Install ArgoCD
 on: push
 jobs:
   deploy-terraform:
@@ -19,6 +19,6 @@ jobs:
         kustomize_output_file: "manifests/install-argocd.yaml"
     - name: Apply Terraform
       id: apply-terraform
-      run: sed -i "s/<project-id>/${{ secrets.PROJECT_ID }}/g" main.tf && terraform init && terraform apply -auto-approve -var="project_id=${{ secrets.PROJECT_ID  }}"
+      run: sed -i "s/<project-id>/${{ secrets.PROJECT_ID }}/g" versions.tf && terraform init && terraform apply -auto-approve -var="project_id=${{ secrets.PROJECT_ID  }}"
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }} 
