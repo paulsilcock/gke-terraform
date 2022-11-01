@@ -8,17 +8,25 @@ jobs:
         working-directory: ./terraform
     steps:
     - uses: actions/checkout@v2
+
     - name: Install Terraform
       id: install-terraform
       run: wget -O terraform.zip https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15.3_linux_amd64.zip && unzip terraform.zip && chmod +x terraform && sudo mv terraform /usr/local/bin
+    
     - name: Kustomize Build
       uses: karancode/kustomize-github-action@master   
       with:
         kustomize_version: '4.5.7'
         kustomize_build_dir: 'manifests/argocd'
         kustomize_output_file: "manifests/install-argocd.yaml"
+
+    - id: "auth"
+      name: Authenticate with Google Cloud
+      uses: "google-github-actions/auth@v0.8.3"
+      with:
+        workload_identity_provider: ${{secrets.WI_PROVIDER}}
+        service_account: ${{secrets.GSA_TERRAFORM}}
+
     - name: Apply Terraform
       id: apply-terraform
       run: sed -i "s/<project-id>/${{ secrets.PROJECT_ID }}/g" versions.tf && terraform init && terraform apply -auto-approve -var="project_id=${{ secrets.PROJECT_ID  }}"
-      env:
-        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }} 
