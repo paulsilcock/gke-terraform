@@ -47,8 +47,6 @@ The GCP free trial/free tier is pretty generous, and the control-plane costs are
 ## What next?
 
 Infrastructure-as-Code brings many benefits, such as reproducibility, audit history, consistent environments,  lack of manual intervention etc. But for now this repository doesn't _test_ our infrastructure code, which in a real production setting would be quite scary 😆. In the short term:
-* Migrate this fork to a dedicated repository
-  * This will allow creation of Github Issues, as well as preventing accidental pull requests targeting the original repository!
 * Ensure _all_ infrastructure is reproducible
   * Currently the artifact registry and static load balancing IP are manually created
 * Come up with an appropriate testing strategy
