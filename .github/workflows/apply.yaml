@@ -1,0 +1,28 @@
+name: Provision GKE Cluster
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    name: Apply Terraform plan
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: terraform apply
+        uses: dflook/terraform-apply@v1
+        with:
+          path: terraform
+          auto_approve: true
+          variables: |
+            project_id="${{ secrets.PROJECT_ID }}"
