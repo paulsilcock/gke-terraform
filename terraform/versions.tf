@@ -7,7 +7,7 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket = "terraform-backend-<project-id>"
+    bucket = "terraform-backend-pauljs-io"
     prefix = "argocd-terraform"
   }
 }
