@@ -19,7 +19,7 @@ resource "google_container_cluster" "main" {
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
-  
+
   monitoring_config {
     enable_components = ["SYSTEM_COMPONENTS"]
   }
@@ -187,4 +187,9 @@ data "kubectl_file_documents" "cert_issuer" {
 resource "kubectl_manifest" "cert_issuer" {
   count     = length(data.kubectl_file_documents.cert_issuer.documents)
   yaml_body = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
+}
+
+resource "helm_release" "external_secrets" {
+  name  = "external-secrets"
+  chart = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"
 }
