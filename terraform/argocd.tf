@@ -9,8 +9,6 @@ resource "kustomization_resource" "argocd" {
 
   depends_on = [
     kubectl_manifest.namespaces,
-    kubectl_manifest.nginx,
-    kubectl_manifest.certmanager,
     kubectl_manifest.cert_issuer,
     helm_release.external_secrets
   ]
