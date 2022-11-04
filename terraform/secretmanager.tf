@@ -2,12 +2,13 @@
 resource "helm_release" "external_secrets" {
   name = "external-secrets"
 
-  set {
-    name = "serviceAccount.annotations"
-    value = jsonencode({
-      "iam.gke.io/gcp-service-account" = "secret-manager@${var.project_id}.iam.gserviceaccount.com"
-    })
-  }
+  values = [
+    <<EOT
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: secret-manager@${var.project_id}.iam.gserviceaccount.com
+EOT
+  ]
 
   namespace        = "es"
   create_namespace = true
