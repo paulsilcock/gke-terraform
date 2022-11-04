@@ -48,11 +48,11 @@ resource "kubectl_manifest" "cluster_secret_store" {
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
 metadata:
-  name: example
+  name: cluster-secret-store
 spec:
   provider:
     gcpsm:
-      projectID: my-project
+      projectID: ${var.project_id}
       auth:
         workloadIdentity:
           clusterLocation: ${var.region}

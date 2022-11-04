@@ -1,0 +1,11 @@
+- op: add
+  path: /data
+  value:
+    url: https://cd.pauljs.io
+    dex.config: |
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: 123794a5caad7363ca5f
+          clientSecret: $argocd-sso:dex.github.clientSecret
