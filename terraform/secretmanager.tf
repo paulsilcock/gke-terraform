@@ -44,6 +44,5 @@ spec:
           serviceAccountRef:
             name: external-secrets
             namespace: es
-
 YAML
 }
