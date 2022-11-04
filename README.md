@@ -6,6 +6,16 @@ Provisions a Kubernetes cluster using Google Kubernetes Engine, and deploys an i
 
 Currently deploys to my Google Cloud Platform account that qualifies for the 90 day free trial (at the time of writing, this is $300 of credit!)
 
+## Quickstart
+Prerequisites:
+* `terraform`
+  
+Initialise `terraform`:
+```
+terraform -chdir=terraform init -backend=false
+```
+Install the recommended VSCode [extensions](.vscode/extensions.json). VSCode will auto-format and validate on save.
+
 ## Motivation
 
 This started as a place to explore Kubernetes and Infrastructure-as-Code techniques. More recently, the cluster created here is being used to explore various MLOps practices & technologies (see [here](https://github.com/paulsilcock/mlops)).

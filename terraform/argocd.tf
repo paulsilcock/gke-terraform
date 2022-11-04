@@ -1,5 +1,7 @@
-data "kubectl_file_documents" "argocd" {
-  content = file("../manifests/install-argocd.yaml")
+data "kustomization_build" "argocd" {
+  provider = kustomization
+
+  path = "${path.root}/../manifests/argocd"
 }
 
 resource "kubectl_manifest" "argocd" {
@@ -9,8 +11,10 @@ resource "kubectl_manifest" "argocd" {
     kubectl_manifest.certmanager,
     kubectl_manifest.cert_issuer
   ]
-  count              = length(data.kubectl_file_documents.argocd.documents)
-  yaml_body          = element(data.kubectl_file_documents.argocd.documents, count.index)
+
+  for_each  = data.kustomization_build.argocd.manifests
+  yaml_body = each.value
+
   override_namespace = "argocd"
 }
 

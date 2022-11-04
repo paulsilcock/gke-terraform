@@ -1,0 +1,24 @@
+name: Create terraform plan
+
+on:
+  - pull_request
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+
+    name: Create Terraform plan
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      TF_VAR_project_id: ${{ secrets.PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: terraform plan
+        uses: dflook/terraform-plan@v1
+        with:
+          path: terraform
