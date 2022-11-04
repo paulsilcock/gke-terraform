@@ -31,4 +31,14 @@ provider "helm" {
   }
 }
 
-provider "kustomization" {}
+module "gke_auth" {
+  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+
+  project_id   = var.project_id
+  cluster_name = var.cluster_name
+  location     = var.location
+}
+
+provider "kustomization" {
+  kubeconfig_raw = module.gke_auth.kubeconfig_raw
+}
