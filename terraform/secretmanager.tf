@@ -22,3 +22,28 @@ resource "google_service_account_iam_member" "secret_manager_workload_id" {
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.project_id}.svc.id.goog[es/external-secrets]"
 }
+
+resource "kubectl_manifest" "cluster_secret_store" {
+  depends_on = [
+    helm_release.external_secrets
+  ]
+  yaml_body = <<YAML
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: example
+spec:
+  provider:
+    gcpsm:
+      projectID: my-project
+      auth:
+        workloadIdentity:
+          clusterLocation: ${var.region}
+          clusterName: ${var.cluster_name}
+          clusterProjectID: ${var.project_id}
+          serviceAccountRef:
+            name: external-secrets
+            namespace: es
+
+YAML
+}
