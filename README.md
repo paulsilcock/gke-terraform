@@ -8,9 +8,9 @@ Currently deploys to my Google Cloud Platform account that qualifies for the 90 
 
 ## Quickstart
 Prerequisites:
-* `terraform`
+* Install `terraform`
   
-Initialise `terraform`:
+Initialise `terraform` to allow `fmt`/`validate` to run locally:
 ```
 terraform -chdir=terraform init -backend=false
 ```

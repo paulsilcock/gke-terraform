@@ -188,8 +188,3 @@ resource "kubectl_manifest" "cert_issuer" {
   count     = length(data.kubectl_file_documents.cert_issuer.documents)
   yaml_body = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
 }
-
-resource "helm_release" "external_secrets" {
-  name  = "external-secrets"
-  chart = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"
-}
