@@ -16,12 +16,3 @@ patchesJson6902:
       version: v1
       name: argocd-cm
     path: ./patches/argocd-cm.yaml
-
-  - target:
-      kind: Deployment
-      version: v1
-      name: argocd-server
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/command
-        value: ["argocd-server", "--insecure"]
