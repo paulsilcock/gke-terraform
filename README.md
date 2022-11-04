@@ -9,7 +9,6 @@ Currently deploys to my Google Cloud Platform account that qualifies for the 90 
 ## Quickstart
 Prerequisites:
 * `terraform`
-* `kustomize`
   
 Initialise `terraform`:
 ```

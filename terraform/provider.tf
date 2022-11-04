@@ -30,3 +30,5 @@ provider "helm" {
     )
   }
 }
+
+provider "kustomization" {}
