@@ -1,0 +1,16 @@
+- op: add
+  path: /data
+  value:
+    policy.csv: |
+      p, role:admin, applications, *, */*, allow
+      p, role:admin, clusters, get, *, allow
+      p, role:admin, repositories, get, *, allow
+      p, role:admin, repositories, create, *, allow
+      p, role:admin, repositories, update, *, allow
+      p, role:admin, repositories, delete, *, allow
+      p, role:admin, logs, get, *, allow
+      p, role:admin, exec, create, */*, allow
+
+      g, ps88uk@gmail.com, role:admin
+
+    scopes: "[groups, email]"
