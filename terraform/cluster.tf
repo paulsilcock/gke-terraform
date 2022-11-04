@@ -190,7 +190,15 @@ resource "kubectl_manifest" "cert_issuer" {
 }
 
 resource "helm_release" "external_secrets" {
-  name             = "external-secrets"
+  name = "external-secrets"
+
+  set {
+    name = "serviceAccount.annotations"
+    value = jsonencode({
+      "iam.gke.io/gcp-service-account" = "secret-manager@${var.project_id}.iam.gserviceaccount.com"
+    })
+  }
+
   namespace        = "es"
   create_namespace = true
   chart            = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"

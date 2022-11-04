@@ -20,3 +20,9 @@ resource "google_service_account" "argo-workflow" {
   account_id   = "argo-workflow"
   display_name = "Argo workflow management"
 }
+
+# Used to interact with GCP Secrets Manager 
+resource "google_service_account" "secret_manager" {
+  account_id   = "secret-manager"
+  display_name = "Secret manager"
+}
