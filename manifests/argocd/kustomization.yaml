@@ -6,7 +6,6 @@ resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.14/manifests/install.yaml
   - ./ingress.yaml
   - ./sso-external-secret.yaml
-  - ./root-app.yaml
 
 namespace: argocd
 
