@@ -4,28 +4,16 @@ data "kustomization_build" "argocd" {
   path = "${path.root}/../manifests/argocd"
 }
 
-resource "kubectl_manifest" "argocd" {
+resource "kustomization_resource" "argocd" {
+  provider = kustomization
+
   depends_on = [
     kubectl_manifest.namespaces,
-    kubectl_manifest.nginx,
-    kubectl_manifest.certmanager,
-    kubectl_manifest.cert_issuer
+    kubectl_manifest.cert_issuer,
+    helm_release.external_secrets
   ]
 
-  for_each  = data.kustomization_build.argocd.manifests
-  yaml_body = each.value
+  for_each = data.kustomization_build.argocd.ids
 
-  override_namespace = "argocd"
-}
-
-data "kubectl_file_documents" "rootapp" {
-  content = file("../manifests/root-app.yaml")
-}
-
-resource "kubectl_manifest" "rootapp" {
-  depends_on = [
-    kubectl_manifest.argocd
-  ]
-  count     = length(data.kubectl_file_documents.rootapp.documents)
-  yaml_body = element(data.kubectl_file_documents.rootapp.documents, count.index)
+  manifest = data.kustomization_build.argocd.manifests[each.value]
 }
