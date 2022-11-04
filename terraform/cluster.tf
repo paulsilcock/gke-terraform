@@ -190,6 +190,8 @@ resource "kubectl_manifest" "cert_issuer" {
 }
 
 resource "helm_release" "external_secrets" {
-  name  = "external-secrets"
-  chart = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"
+  name             = "external-secrets"
+  namespace        = "es"
+  create_namespace = true
+  chart            = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"
 }
