@@ -34,7 +34,7 @@ resource "google_project_iam_binding" "cluster-viewer" {
 # value `paulsilcock/mlops` to impersonate the Argo Workflow GCP service account.
 # This allows Github actions to publish images to our registry, and submit Argo Workflows.
 resource "google_service_account_iam_member" "argo-workflow-github-access" {
-  service_account_id = google_service_account.argo-workflow.id
+  service_account_id = google_service_account.argo-workflow.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
 }
@@ -43,7 +43,7 @@ resource "google_service_account_iam_member" "argo-workflow-github-access" {
 # value `paulsilcock/mlops` to impersonate the DVC Remote GCP service account.
 # This allows Github actions to push/pull to our DVC remote storage bucket.
 resource "google_service_account_iam_member" "dvc-remote-github-access" {
-  service_account_id = google_service_account.dvc-gsa.id
+  service_account_id = google_service_account.dvc-gsa.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
 }

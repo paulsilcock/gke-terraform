@@ -35,7 +35,7 @@ resource "google_project_iam_binding" "secret_manager_tokens" {
 
 # Allow external-secrets KSA to impersonate secrets-manager GSA
 resource "google_service_account_iam_member" "secret_manager_workload_id" {
-  service_account_id = google_service_account.secret_manager.id
+  service_account_id = google_service_account.secret_manager.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.project_id}.svc.id.goog[es/external-secrets]"
 }

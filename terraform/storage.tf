@@ -53,7 +53,7 @@ resource "google_storage_bucket_iam_policy" "policy" {
 # GCP `dvc-remote` service account (see "[dev/dvc-remote]" in the `member` 
 # attribute)
 resource "google_service_account_iam_member" "dvc-gsa" {
-  service_account_id = google_service_account.dvc-gsa.id
+  service_account_id = google_service_account.dvc-gsa.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${var.project_id}.svc.id.goog[dev/dvc-remote]"
 }
