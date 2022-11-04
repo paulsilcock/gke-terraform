@@ -188,18 +188,3 @@ resource "kubectl_manifest" "cert_issuer" {
   count     = length(data.kubectl_file_documents.cert_issuer.documents)
   yaml_body = element(data.kubectl_file_documents.cert_issuer.documents, count.index)
 }
-
-resource "helm_release" "external_secrets" {
-  name = "external-secrets"
-
-  set {
-    name = "serviceAccount.annotations"
-    value = jsonencode({
-      "iam.gke.io/gcp-service-account" = "secret-manager@${var.project_id}.iam.gserviceaccount.com"
-    })
-  }
-
-  namespace        = "es"
-  create_namespace = true
-  chart            = "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-0.6.1/external-secrets-0.6.1.tgz"
-}
