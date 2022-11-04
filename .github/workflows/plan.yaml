@@ -14,6 +14,8 @@ jobs:
       TF_VAR_project_id: ${{ secrets.PROJECT_ID }}
       TERRAFORM_PRE_RUN: |
         curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        chmod u+x ./kustomize
+        mv ./kustomize /usr/local/bin/kustomize
 
     steps:
       - name: Checkout
