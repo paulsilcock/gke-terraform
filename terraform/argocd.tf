@@ -1,5 +1,5 @@
 data "external" "argocd" {
-  program = ["kustomize", "${path.root}/../manifests/argocd"]
+  program = ["kustomize", "build", "${path.root}/../manifests/argocd"]
 }
 
 data "kubectl_file_documents" "argocd" {
