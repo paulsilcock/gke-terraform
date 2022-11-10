@@ -34,7 +34,7 @@ resource "google_container_node_pool" "generic" {
 
   autoscaling {
     min_node_count = 1
-    max_node_count = 4
+    max_node_count = 2
   }
 
   management {
@@ -44,7 +44,7 @@ resource "google_container_node_pool" "generic" {
 
   node_config {
     spot         = true
-    machine_type = "e2-micro"
+    machine_type = "e2-small"
 
     disk_size_gb = 15
 
