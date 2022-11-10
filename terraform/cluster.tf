@@ -44,7 +44,7 @@ resource "google_container_node_pool" "generic" {
 
   node_config {
     preemptible  = true
-    machine_type = "e2-small"
+    machine_type = "e2-micro"
 
     disk_size_gb = 15
 
