@@ -34,7 +34,7 @@ resource "google_container_node_pool" "generic" {
 
   autoscaling {
     min_node_count = 1
-    max_node_count = 3
+    max_node_count = 4
   }
 
   management {
@@ -43,7 +43,7 @@ resource "google_container_node_pool" "generic" {
   }
 
   node_config {
-    preemptible  = true
+    spot         = true
     machine_type = "e2-micro"
 
     disk_size_gb = 15
@@ -82,7 +82,7 @@ resource "google_container_node_pool" "workloads" {
   }
 
   node_config {
-    preemptible  = true
+    spot         = true
     machine_type = "e2-standard-2"
 
     disk_size_gb = 20
@@ -127,7 +127,7 @@ resource "google_container_node_pool" "gpu" {
   }
 
   node_config {
-    preemptible  = true
+    spot         = true
     machine_type = "n1-standard-1"
 
     disk_size_gb = 20
