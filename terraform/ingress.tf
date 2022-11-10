@@ -18,9 +18,4 @@ resource "helm_release" "nginx" {
     name  = "controller.service.loadBalancerIP"
     value = google_compute_address.ingress.address
   }
-
-  set {
-    name  = "controller.service.externalTrafficPolicy"
-    value = "Local"
-  }
 }
