@@ -35,7 +35,7 @@ The GCP free trial/free tier is pretty generous, and the control-plane costs are
     * Workloads - scales to zero if not in use. Requires pod tolerations.
     * GPU - scales to zero if not in use. Requires pod tolerations.
   * Ingress:
-    * Configures `ingress-nginx` to use static (currently hard-coded!) IP address for load balancing
+    * Configures `ingress-nginx` to use static IP address for load balancing
     * Uses `cert-manager` to monitor `Ingress` objects and create `Certificate`s as appropriate. Uses a `ClusterIssuer` to request certificates from [`letsencrypt`](https://letsencrypt.org/)
   * Namespaces
     * Creates `dev`, `staging` and `prod` environment namespaces
@@ -58,7 +58,7 @@ The GCP free trial/free tier is pretty generous, and the control-plane costs are
 
 Infrastructure-as-Code brings many benefits, such as reproducibility, audit history, consistent environments,  lack of manual intervention etc. But for now this repository doesn't _test_ our infrastructure code, which in a real production setting would be quite scary 😆. In the short term:
 * Ensure _all_ infrastructure is reproducible
-  * Currently the artifact registry and static load balancing IP are manually created
+  * Currently the artifact registry is manually created
 * Come up with an appropriate testing strategy
   * Think linting, unit testing, compliance tests, ephemeral pull request environments etc.
   * Note that any strategy must optimize for _cost_, since we're reliant upon GCP free credit (so a duplicate `staging` cluster would be out of the question unfortunately!)
