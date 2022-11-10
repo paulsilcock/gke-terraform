@@ -8,5 +8,5 @@
           id: github
           name: GitHub
           config:
-            clientID: 123794a5caad7363ca5f
+            clientID: $argocd-sso:dex.github.clientID
             clientSecret: $argocd-sso:dex.github.clientSecret
