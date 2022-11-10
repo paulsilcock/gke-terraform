@@ -1,8 +1,11 @@
-resource "google_compute_global_address" "ingress" {
-  provider = google-beta
-  name     = "ingress-nginx-lb"
-  project  = var.project_id
-  address  = "34.89.32.55"
+resource "google_compute_address" "ingress" {
+  name         = "ingress-nginx-lb"
+  address_type = "EXTERNAL"
+  region       = var.region
+}
+
+output "cluster_ingress_ip" {
+  value = google_compute_address.ingress
 }
 
 resource "helm_release" "nginx" {
@@ -13,7 +16,7 @@ resource "helm_release" "nginx" {
 
   set {
     name  = "controller.service.loadBalancerIP"
-    value = google_compute_global_address.ingress.address
+    value = google_compute_address.ingress.address
   }
 
   set {
