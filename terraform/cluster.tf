@@ -162,23 +162,6 @@ resource "kubectl_manifest" "namespaces" {
   yaml_body = element(data.kubectl_file_documents.namespaces.documents, count.index)
 }
 
-resource "helm_release" "nginx" {
-  name       = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.4.0"
-
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = "34.89.32.55"
-  }
-
-  set {
-    name  = "controller.service.externalTrafficPolicy"
-    value = "Local"
-  }
-}
-
 data "kubectl_file_documents" "certmanager" {
   content = file("../manifests/cert-manager-v1.9.1.yaml")
 }
