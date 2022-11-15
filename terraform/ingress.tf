@@ -13,13 +13,25 @@ output "cluster_ingress_ip" {
 }
 
 resource "helm_release" "nginx" {
-  name       = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.4.0"
+  name             = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  version          = "4.4.0"
+  namespace        = "ingress-nginx"
+  create_namespace = true
 
-  set {
-    name  = "controller.hostNetwork"
-    value = true
-  }
+
+  values = [
+    <<EOT
+controller:
+  hostNetwork: true
+  nodeSelector:
+    cloud.google.com/gke-nodepool: ${google_container_node_pool.ingress.name}
+  tolerations:
+  - key: dedicated
+    operator: Equal
+    value: ingress
+    effect: NoSchedule 
+EOT
+  ]
 }
