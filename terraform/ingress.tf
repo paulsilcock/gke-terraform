@@ -1,7 +1,11 @@
 resource "google_compute_address" "ingress" {
+  provider     = google-beta
   name         = "ingress-nginx-lb"
   address_type = "EXTERNAL"
   region       = var.region
+  labels = {
+    "kubeip" = var.cluster_name
+  }
 }
 
 output "cluster_ingress_ip" {
@@ -15,7 +19,7 @@ resource "helm_release" "nginx" {
   version    = "4.4.0"
 
   set {
-    name  = "controller.service.loadBalancerIP"
-    value = google_compute_address.ingress.address
+    name  = "controller.hostNetwork"
+    value = true
   }
 }
