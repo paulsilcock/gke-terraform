@@ -26,3 +26,13 @@ resource "google_service_account" "secret_manager" {
   account_id   = "secret-manager"
   display_name = "Secret manager"
 }
+
+# Monitors ingress node pool and assigns static IP. 
+# Saves us using a costly load balancer, which is overkill for 
+# a personal project...
+resource "google_service_account" "kubeip_service_account" {
+  account_id   = "kube-ip-manager"
+  project      = var.project_id
+  display_name = "kubeIP"
+  depends_on   = [google_project_iam_custom_role.kubeip_role]
+}

@@ -25,6 +25,42 @@ resource "google_container_cluster" "main" {
   }
 }
 
+resource "google_container_node_pool" "ingress" {
+  name     = "${var.cluster_name}-ingress-nodepool"
+  location = var.location
+  cluster  = google_container_cluster.main.name
+
+  initial_node_count = 1
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  node_config {
+    spot         = true
+    machine_type = "e2-micro"
+
+    disk_size_gb = 10
+
+    service_account = google_service_account.main.email
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
+    taint {
+      key    = "dedicated"
+      value  = "ingress"
+      effect = "NO_SCHEDULE"
+    }
+  }
+
+  timeouts {
+    create = "20m"
+    update = "20m"
+  }
+}
+
 resource "google_container_node_pool" "generic" {
   name     = "${var.cluster_name}-generic-nodepool"
   location = var.location
