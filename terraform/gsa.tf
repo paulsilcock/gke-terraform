@@ -36,3 +36,9 @@ resource "google_service_account" "kubeip_service_account" {
   display_name = "kubeIP"
   depends_on   = [google_project_iam_custom_role.kubeip_role]
 }
+
+# Publish images to artifact registry duing CI builds
+resource "google_service_account" "registry" {
+  account_id   = "registry"
+  display_name = "Publish artifacts"
+}
