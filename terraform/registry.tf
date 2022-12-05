@@ -10,21 +10,13 @@ resource "google_project_iam_binding" "artifact-registry-read" {
   ]
 }
 
-# Allows Argo Workflow account to publish images from Github
+# Allows us to publish images from Github
 # This role will be removed from argo-workflow user (see #23)
 resource "google_project_iam_binding" "artifact-registry-write" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
   members = [
-    "serviceAccount:${google_service_account.argo-workflow.email}"
-  ]
-}
-
-# Allows us to publish images from Github
-resource "google_project_iam_binding" "registry-write" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  members = [
+    "serviceAccount:${google_service_account.argo-workflow.email}",
     "serviceAccount:${google_service_account.registry.email}"
   ]
 }
