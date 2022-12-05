@@ -11,9 +11,6 @@ spec:
     repoURL: "https://github.com/paulsilcock/app-of-apps"
     path: root
     targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
   destination:
     server: "https://kubernetes.default.svc"
     namespace: default
