@@ -39,6 +39,15 @@ resource "google_service_account_iam_member" "argo-workflow-github-access" {
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/mlops"
 }
 
+# Allow external identities from the workload pool from any repository 
+# to impersonate the Registry GCP service account.
+# This allows Github actions to publish images to our registry.
+resource "google_service_account_iam_member" "registry-github-access" {
+  service_account_id = google_service_account.registry.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/*"
+}
+
 # Allow external identities from the workload pool that have the repository attribute 
 # value `paulsilcock/mlops` to impersonate the DVC Remote GCP service account.
 # This allows Github actions to push/pull to our DVC remote storage bucket.
