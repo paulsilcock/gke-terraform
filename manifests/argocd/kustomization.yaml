@@ -21,3 +21,9 @@ patchesJson6902:
       version: v1
       name: argocd-rbac-cm
     path: ./patches/argocd-rbac-cm.yaml
+
+  - target:
+      kind: Deployment
+      version: v1
+      name: argocd-server
+    path: ./patches/argocd-server-deployment.yaml
