@@ -4,18 +4,18 @@ metadata:
   name: root-app
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/paulsilcock/app-of-apps'
-    path: apps
+    repoURL: "https://github.com/paulsilcock/app-of-apps"
+    path: root
     targetRevision: HEAD
     helm:
       valueFiles:
         - values.yaml
   destination:
-    server: 'https://kubernetes.default.svc'
+    server: "https://kubernetes.default.svc"
     namespace: default
   syncPolicy:
     automated: {}
