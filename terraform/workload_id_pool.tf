@@ -13,6 +13,7 @@ resource "google_iam_workload_identity_pool_provider" "github-provider" {
   attribute_mapping = {
     "google.subject" : "assertion.sub"
     "attribute.repository" : "assertion.repository"
+    "attribute.repository_owner" : "assertion.repository_owner"
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -40,12 +41,12 @@ resource "google_service_account_iam_member" "argo-workflow-github-access" {
 }
 
 # Allow external identities from the workload pool from any repository 
-# to impersonate the Registry GCP service account.
+# to impersonate the Registry GCP service account (inspect the repository_owner).
 # This allows Github actions to publish images to our registry.
 resource "google_service_account_iam_member" "registry-github-access" {
   service_account_id = google_service_account.registry.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository/paulsilcock/*"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.workload-pool.name}/attribute.repository_owner/paulsilcock"
 }
 
 # Allow external identities from the workload pool that have the repository attribute 
