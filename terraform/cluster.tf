@@ -10,6 +10,13 @@ resource "google_container_cluster" "main" {
     enabled = false
   }
 
+  # Disable ability to use GKE-native load balancer (we use a deicated node instead)
+  addons_config {
+    http_load_balancing {
+      disabled = true
+    }
+  }
+
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -38,7 +45,6 @@ resource "google_container_node_pool" "ingress" {
   }
 
   node_config {
-    spot         = true
     machine_type = "e2-micro"
 
     disk_size_gb = 10
@@ -80,7 +86,7 @@ resource "google_container_node_pool" "generic" {
 
   node_config {
     spot         = true
-    machine_type = "e2-small"
+    machine_type = "e2-medium"
 
     disk_size_gb = 15
 
