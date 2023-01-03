@@ -24,6 +24,8 @@ resource "helm_release" "nginx" {
   values = [
     <<EOT
 controller:
+  service:
+    enabled: false
   hostNetwork: true
   nodeSelector:
     cloud.google.com/gke-nodepool: ${google_container_node_pool.ingress.name}
