@@ -45,6 +45,7 @@ resource "google_container_node_pool" "ingress" {
   }
 
   node_config {
+    spot         = true
     machine_type = "e2-micro"
 
     disk_size_gb = 10
